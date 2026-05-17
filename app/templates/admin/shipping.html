@@ -1,0 +1,41 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Shipping Methods</h1>
+    <div class="page-subtitle">Configure delivery options</div>
+  </div>
+  <a href="{{ url_for('admin.add_shipping') }}" class="btn-admin-primary">+ Add Method</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Cost</th>
+      <th>Delivery Estimate</th>
+      <th>Active</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for method in methods %}
+    <tr>
+      <td>{{ method.name }}</td>
+      <td class="gold">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(method.cost) }}</td>
+      <td class="muted">{{ method.delivery_estimate or '—' }}</td>
+      <td><span class="badge {% if method.is_active %}badge-active{% else %}badge-inactive{% endif %}">{{ 'Yes' if method.is_active else 'No' }}</span></td>
+      <td style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('admin.edit_shipping', id=method.id) }}" class="btn-admin-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+        <form class="delete-form" method="POST" action="{{ url_for('admin.delete_shipping', id=method.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this shipping method?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="5">No shipping methods configured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

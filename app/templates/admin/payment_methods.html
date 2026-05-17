@@ -1,0 +1,39 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Payment Methods</h1>
+    <div class="page-subtitle">Configure accepted payment options</div>
+  </div>
+  <a href="{{ url_for('admin.add_payment_method') }}" class="btn-admin-primary">+ Add Method</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Instructions</th>
+      <th>Active</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for method in methods %}
+    <tr>
+      <td>{{ method.name }}</td>
+      <td class="muted">{{ method.instructions or '—' }}</td>
+      <td><span class="badge {% if method.is_active %}badge-active{% else %}badge-inactive{% endif %}">{{ 'Yes' if method.is_active else 'No' }}</span></td>
+      <td style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('admin.edit_payment_method', id=method.id) }}" class="btn-admin-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+        <form class="delete-form" method="POST" action="{{ url_for('admin.delete_payment_method', id=method.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this payment method?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="4">No payment methods configured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

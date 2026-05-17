@@ -1,0 +1,68 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ 'Edit' if variant else 'Add' }} Variant</h1>
+    <div class="page-subtitle">For {{ product.name }} ({{ product.sku }})</div>
+  </div>
+</div>
+
+<div class="admin-form-card">
+  <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0;">
+
+    <div class="form-group">
+      <label class="form-label" for="sku">Variant SKU *</label>
+      <input class="form-input" type="text" id="sku" name="sku" required value="{{ variant.sku if variant else (product.sku + '-V' + (product.variants.count() + 1)|string) }}">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="color">Color</label>
+        <input class="form-input" type="text" id="color" name="color" placeholder="e.g. Rose Gold" value="{{ variant.color if variant else '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="strap_type">Strap Type</label>
+        <input class="form-input" type="text" id="strap_type" name="strap_type" placeholder="e.g. Leather" value="{{ variant.strap_type if variant else '' }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="size">Size / Dial</label>
+        <input class="form-input" type="text" id="size" name="size" placeholder="e.g. 42mm" value="{{ variant.size if variant else '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edition">Edition</label>
+        <input class="form-input" type="text" id="edition" name="edition" placeholder="e.g. Limited Edition" value="{{ variant.edition if variant else '' }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="price_override">Price Override ({{ config.CURRENCY_SYMBOL }})</label>
+        <input class="form-input" type="number" step="0.01" id="price_override" name="price_override" placeholder="Leave blank for base price" value="{{ variant.price_override if variant and variant.price_override else '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="quantity">Quantity in Stock *</label>
+        <input class="form-input" type="number" id="quantity" name="quantity" required value="{{ variant.quantity if variant else 0 }}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="image">Variant Image</label>
+      {% if variant and variant.image %}
+        <div style="margin-bottom: 0.5rem;">
+          <img src="{{ variant.image }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid var(--glass-border);">
+        </div>
+      {% endif %}
+      <input class="form-input" type="file" id="image" name="image" accept="image/*">
+      <small class="muted">Upload a unique image for this specific variant.</small>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-admin-primary">{{ 'Update' if variant else 'Forge' }} Variant</button>
+      <a href="{{ url_for('admin.manage_product_variants', id=product.id) }}" class="btn-admin-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

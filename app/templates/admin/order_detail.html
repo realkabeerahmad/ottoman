@@ -1,0 +1,103 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Order #{{ order.order_number }}</h1>
+    <div class="page-subtitle">Placed {{ order.created_at.strftime('%d %b %Y at %H:%M') }}</div>
+  </div>
+  <div>
+    <form method="POST" action="{{ url_for('admin.update_order_status', id=order.id) }}" style="display: flex; gap: 0.8rem; align-items: center;">
+      <select name="order_status_id" class="form-select" style="width: auto; min-width: 160px;">
+        <option value="">— Select Status —</option>
+        {% for s in statuses %}
+        <option value="{{ s.id }}" {% if order.order_status_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary" style="padding: 0.6rem 1.2rem;">Update</button>
+    </form>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+  <!-- Items Table -->
+  <div>
+    <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem; font-size: 1rem;">Order Items</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Line Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items %}
+        <tr>
+          <td>{{ item.product_name }}</td>
+          <td class="mono muted">{{ item.sku or '—' }}</td>
+          <td class="gold">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(item.price) }}</td>
+          <td>{{ item.quantity }}</td>
+          <td class="gold">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(item.price * item.quantity) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sidebar Details -->
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- Customer -->
+    <div class="stat-card">
+      <div class="stat-label">Customer</div>
+      <div style="color: rgba(255,255,255,0.85); font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; margin-bottom: 0.5rem;">{{ order.customer_name }}</div>
+      <div class="muted" style="font-size: 0.9rem;">{{ order.customer_email }}</div>
+      {% if order.customer_phone %}
+      <div class="muted" style="font-size: 0.9rem;">{{ order.customer_phone }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Shipping -->
+    <div class="stat-card">
+      <div class="stat-label">Shipping Address</div>
+      <div style="color: rgba(255,255,255,0.7); font-family: 'Cormorant Garamond', serif; font-size: 1rem; line-height: 1.6;">
+        {{ order.shipping_address }}<br>
+        {{ order.shipping_city }}
+        {% if order.shipping_postal_code %}, {{ order.shipping_postal_code }}{% endif %}<br>
+        {{ order.shipping_country }}
+      </div>
+      {% if order.shipping_method %}
+      <div style="margin-top: 0.8rem; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em;">
+        Via: {{ order.shipping_method.name }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Financials -->
+    <div class="stat-card">
+      <div class="stat-label">Financials</div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span class="muted">Subtotal</span>
+        <span style="color: rgba(255,255,255,0.7);">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.subtotal) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span class="muted">Shipping</span>
+        <span style="color: rgba(255,255,255,0.7);">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.shipping_cost) }}</span>
+      </div>
+      {% if order.discount_amount > 0 %}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span style="color: var(--gold);">Discount{% if order.coupon %} ({{ order.coupon.code }}){% endif %}</span>
+        <span style="color: var(--gold);">-{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.discount_amount) }}</span>
+      </div>
+      {% endif %}
+      <hr style="border: none; border-top: 1px solid rgba(201,168,76,0.1); margin: 0.8rem 0;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: 'Cinzel', serif; font-weight: bold; color: rgba(255,255,255,0.85);">Total</span>
+        <span style="color: var(--gold); font-size: 1.4rem; font-family: 'Cinzel Decorative', serif;">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.total_amount) }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

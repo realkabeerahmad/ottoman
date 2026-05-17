@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-section" style="padding: 120px 4rem 8rem; min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+  <div class="auth-box" style="background: var(--glass); border: 1px solid var(--glass-border); padding: 4rem; max-width: 500px; width: 100%; text-align: center;">
+    <h2 style="font-family: 'Cinzel Decorative', serif; font-size: 2rem; color: var(--gold); margin-bottom: 2rem;">Enter the Court</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="color: {% if category == 'error' %}#c0392b{% else %}var(--gold){% endif %}; font-family: 'Cinzel', serif; font-size: 0.8rem; margin-bottom: 1.5rem; letter-spacing: 0.1em; border: 1px solid; padding: 0.5rem;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}" style="display: flex; flex-direction: column; gap: 1.5rem; text-align: left;">
+      <div>
+        <label for="email" style="font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Email Address</label>
+        <input type="email" id="email" name="email" required style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+      </div>
+      <div>
+        <label for="password" style="font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Password</label>
+        <input type="password" id="password" name="password" required style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--glass-border)'">
+      </div>
+      
+      <button type="submit" class="btn-primary" style="margin-top: 1rem; width: 100%;">Authenticate</button>
+    </form>
+    
+    <div style="margin-top: 2rem; font-style: italic; color: var(--text-dim);">
+      Not a member of the court? <a href="{{ url_for('auth.register') }}" style="color: var(--gold); text-decoration: none;">Request Access</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

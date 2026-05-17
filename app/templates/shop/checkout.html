@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="checkout-section" style="padding: 120px 4rem 8rem; max-width: 1200px; margin: 0 auto;">
+  <div class="section-header">
+    <span class="section-label">◆ Secure Acquisition ◆</span>
+    <h2 class="section-title">Finalize Order</h2>
+  </div>
+
+  <div class="checkout-grid">
+    <!-- Checkout Form -->
+    <div class="checkout-form-panel">
+      <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 2rem;">Details of Recipient</h3>
+      
+      <form method="POST" action="{{ url_for('shop.checkout') }}" id="checkoutForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div>
+            <label style="display:block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Full Name *</label>
+            <input type="text" name="name" required value="{% if current_user.is_authenticated %}{{ current_user.full_name }}{% endif %}" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none;">
+          </div>
+          <div>
+            <label style="display:block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Email Address *</label>
+            <input type="email" name="email" required value="{% if current_user.is_authenticated %}{{ current_user.email }}{% endif %}" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none;">
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 2rem;">
+          <label style="display:block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Shipping Address *</label>
+          <input type="text" name="address" required style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none;">
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div>
+            <label style="display:block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">City *</label>
+            <input type="text" name="city" required style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none;">
+          </div>
+          <div>
+            <label style="display:block; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase;">Phone Number</label>
+            <input type="text" name="phone" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.5rem 0; font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; outline: none;">
+          </div>
+        </div>
+
+        {% if shipping_methods %}
+        <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem;">Shipping Method</h3>
+        <div style="margin-bottom: 2rem;">
+          {% for method in shipping_methods %}
+          <label style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--text-primary); font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.1em; padding: 0.8rem; border: 1px solid var(--glass-border); margin-bottom: 0.5rem; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <input type="radio" name="shipping_method_id" value="{{ method.id }}" data-cost="{{ method.cost }}" {% if loop.first %}checked{% endif %}>
+              {{ method.name }}
+              {% if method.delivery_estimate %}<small style="color: var(--text-dim);">({{ method.delivery_estimate }})</small>{% endif %}
+            </div>
+            <span class="shipping-cost-label" style="color: var(--gold);">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(method.cost) }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if payment_methods %}
+        <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem;">Payment Method</h3>
+        <div style="margin-bottom: 2rem;">
+          {% for method in payment_methods %}
+          <label style="display: flex; align-items: center; gap: 0.8rem; color: var(--text-primary); font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.1em; padding: 0.8rem; border: 1px solid var(--glass-border); margin-bottom: 0.5rem; cursor: pointer;">
+            <input type="radio" name="payment_method_id" value="{{ method.id }}" {% if loop.first %}checked{% endif %}>
+            {{ method.name }}
+            {% if method.instructions %}<small style="color: var(--text-dim); margin-left: 0.5rem;">({{ method.instructions }})</small>{% endif %}
+          </label>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem;">Payment Method</h3>
+          <label style="display: flex; align-items: center; gap: 1rem; color: var(--text-primary); font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.1em;">
+            <input type="radio" name="payment_method_id" value="cod" checked> Cash on Delivery
+          </label>
+        </div>
+        {% endif %}
+
+        <!-- Coupon Code (hidden field for actual coupon code, set by JS) -->
+        <input type="hidden" name="coupon_code" id="couponCodeHidden" value="">
+
+        <button type="submit" class="btn-primary" style="width: 100%;">Confirm Acquisition</button>
+      </form>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="checkout-summary-panel">
+      <h3 style="font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Order Summary</h3>
+      
+      <div id="checkoutItems" style="margin-bottom: 2rem;">
+        {% for item in cart_items %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+          <div>
+            <div style="font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--text-primary);">{{ item.product.name }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Qty: {{ item.quantity }}
+              {% if item.product.discount_price and item.product.discount_price > 0 %}
+                · <span style="color: var(--gold);">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(item.effective_price) }} each</span>
+                <small style="text-decoration: line-through; color: var(--text-dim);">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(item.product.price) }}</small>
+              {% endif %}
+            </div>
+          </div>
+          <div style="color: var(--gold); font-family: 'Cinzel', serif;">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(item.line_total) }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--text-muted);">
+        <span>Subtotal</span>
+        <span id="subtotalDisplay">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(subtotal) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--text-muted);">
+        <span>Shipping</span>
+        <span id="shippingCost">Select above</span>
+      </div>
+
+      <!-- Coupon discount row (hidden until applied) -->
+      <div id="discountRow" style="display: none; justify-content: space-between; margin-bottom: 1rem; color: var(--gold);">
+        <span>Discount <span id="discountLabel"></span></span>
+        <span id="discountAmount"></span>
+      </div>
+
+      <div style="border-top: 1px solid var(--glass-border); padding-top: 1rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--text-primary);">
+          <span>Total</span>
+          <span style="color: var(--gold);" id="orderTotal">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(subtotal) }}</span>
+        </div>
+      </div>
+
+      <!-- Coupon Input -->
+      <div style="border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+        <div style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.8rem;">Have a Coupon?</div>
+        <div style="display: flex; gap: 0;">
+          <input type="text" id="couponInput" placeholder="Enter code..." style="flex: 1; background: transparent; border: 1px solid var(--glass-border); color: var(--text-primary); padding: 0.7rem 1rem; font-family: 'Cormorant Garamond', serif; font-size: 1rem; outline: none; text-transform: uppercase;">
+          <button type="button" onclick="applyCoupon()" style="background: var(--gold); border: none; color: var(--obsidian); padding: 0.7rem 1.2rem; font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-weight: 700;">Apply</button>
+        </div>
+        <div id="couponMsg" style="font-size: 0.85rem; margin-top: 0.5rem; font-style: italic;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const SUBTOTAL = {{ subtotal }};
+let currentShipping = 0;
+let currentDiscount = 0;
+
+function recalcTotal() {
+  const total = Math.max(SUBTOTAL + currentShipping - currentDiscount, 0);
+  document.getElementById('orderTotal').textContent = CURRENCY + total.toFixed(0);
+}
+
+// Shipping selection
+document.querySelectorAll('input[name="shipping_method_id"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    currentShipping = parseFloat(this.dataset.cost) || 0;
+    document.getElementById('shippingCost').textContent = CURRENCY + currentShipping.toFixed(0);
+    recalcTotal();
+  });
+  if (radio.checked) radio.dispatchEvent(new Event('change'));
+});
+
+// Coupon
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim();
+  const msg = document.getElementById('couponMsg');
+  if (!code) { msg.textContent = 'Please enter a code.'; msg.style.color = '#c0392b'; return; }
+
+  fetch('/shop/api/coupon/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code, subtotal: SUBTOTAL })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      currentDiscount = data.discount_amount;
+      document.getElementById('couponCodeHidden').value = data.code;
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('discountLabel').textContent = '(' + data.code + ')';
+      document.getElementById('discountAmount').textContent = '-' + CURRENCY + currentDiscount.toFixed(0);
+      msg.textContent = data.message;
+      msg.style.color = 'var(--gold)';
+      document.getElementById('couponInput').disabled = true;
+      recalcTotal();
+    } else {
+      msg.textContent = data.message;
+      msg.style.color = '#c0392b';
+    }
+  })
+  .catch(() => {
+    msg.textContent = 'Failed to validate coupon.';
+    msg.style.color = '#c0392b';
+  });
+}
+</script>
+{% endblock %}

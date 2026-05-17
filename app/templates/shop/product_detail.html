@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} — Ottoman Time{% endblock %}
+
+{% block content %}
+{% set available_variants = product.variants.all() | selectattr('quantity', 'gt', 0) | list %}
+{% set variant_count = available_variants | length %}
+{% set initial_variant = available_variants[0] if variant_count > 0 else None %}
+
+<section class="detail-section" style="padding: 120px 4rem 6rem; max-width: 1200px; margin: 0 auto;">
+
+  <!-- Breadcrumb -->
+  <div style="font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 3rem;">
+    <a href="{{ url_for('shop.collection') }}" style="color: var(--text-muted); text-decoration: none;">Collection</a>
+    <span style="margin: 0 0.8rem;">→</span>
+    {% if product.category %}
+    <a href="{{ url_for('shop.collection') }}" style="color: var(--text-muted); text-decoration: none;">{{ product.category.name }}</a>
+    <span style="margin: 0 0.8rem;">→</span>
+    {% endif %}
+    <span style="color: var(--gold);">{{ product.name }}</span>
+  </div>
+
+  <div class="detail-grid">
+    
+    <!-- Product Image -->
+    <div class="detail-image reveal" data-reveal-delay="0">
+      <img id="mainProductImage" 
+           src="{{ initial_variant.image if (initial_variant and initial_variant.image) else (product.main_image if product.main_image else '') }}" 
+           alt="{{ product.name }}" 
+           style="width: 100%; height: 100%; object-fit: cover; {% if not product.main_image and not (initial_variant and initial_variant.image) %}display:none;{% endif %}">
+      
+      <div id="noImagePlaceholder" style="text-align: center; color: var(--text-dim); padding: 4rem 0; {% if product.main_image or (initial_variant and initial_variant.image) %}display:none;{% endif %}">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">⌚</div>
+        <div style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;">No image available</div>
+      </div>
+
+      {% if product.is_featured %}
+      <span class="product-badge">Signature</span>
+      {% endif %}
+      {% if product.discount_price %}
+      <span id="saleBadge" style="position: absolute; top: 1rem; left: 1rem; background: #c0392b; color: white; font-family: 'Cinzel', serif; font-size: 0.55rem; letter-spacing: 0.1em; padding: 0.3rem 0.7rem; text-transform: uppercase; font-weight: 700; {% if variant_count > 0 and not product.discount_price %}display:none;{% endif %}">Sale</span>
+      {% endif %}
+    </div>
+
+    <!-- Product Info -->
+    <div class="reveal" data-reveal-delay="150">
+      {% if product.category %}
+      <span style="font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 0.8rem;">{{ product.category.name }} Collection</span>
+      {% endif %}
+
+      <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.4rem; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem;">{{ product.name }}</h1>
+      
+      {% if product.short_description %}
+      <p style="font-style: italic; color: var(--text-muted); font-size: 1.1rem; line-height: 1.7; margin-bottom: 2rem;">{{ product.short_description }}</p>
+      {% endif %}
+
+      <!-- Price -->
+      <div id="priceContainer" style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--glass-border);">
+        {% if variant_count == 0 %}
+          {% if product.discount_price %}
+            <div style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--gold);">
+              {{ config.CURRENCY_SYMBOL }}<span id="displayPrice">{{ "%.0f"|format(product.discount_price) }}</span>
+            </div>
+            <div style="font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text-dim); text-decoration: line-through; margin-top: 0.3rem;">
+              {{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(product.price) }}
+            </div>
+          {% else %}
+            <div style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--gold);">
+              {{ config.CURRENCY_SYMBOL }}<span id="displayPrice">{{ "%.0f"|format(product.price) }}</span>
+            </div>
+          {% endif %}
+        {% else %}
+          {# Prices will be updated by JS based on initial_variant #}
+          <div id="variantPrice" style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--gold);">
+            {{ config.CURRENCY_SYMBOL }}<span id="displayPrice">{{ "%.0f"|format(initial_variant.price_override if initial_variant.price_override else product.price) }}</span>
+          </div>
+          {% if product.discount_price and not initial_variant.price_override %}
+            <div id="strikePrice" style="font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text-dim); text-decoration: line-through; margin-top: 0.3rem;">
+              {{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(product.price) }}
+            </div>
+          {% else %}
+            <div id="strikePrice" style="display:none; font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text-dim); text-decoration: line-through; margin-top: 0.3rem;"></div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- SKU & Status -->
+      <div style="display: flex; gap: 2rem; margin-bottom: 2rem; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;">
+        <span style="color: var(--text-dim);"><i data-lucide="tag" style="width:12px;height:12px;margin-right:0.3rem;vertical-align:-2px;"></i>SKU: <span id="displaySKU">{{ initial_variant.sku if variant_count > 0 else product.sku }}</span></span>
+        <span id="stockStatus" style="color: var(--gold);">
+          {# Updated by JS #}
+          <i data-lucide="check-circle" style="width:12px;height:12px;margin-right:0.3rem;vertical-align:-2px;"></i>
+          <span id="stockText">Loading...</span>
+        </span>
+      </div>
+
+      <!-- Variants Selection -->
+      {% if variant_count > 1 %}
+      <div style="margin-bottom: 2.5rem;">
+        <div style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem;">Select Configuration</div>
+        <div class="variant-selector" style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
+          {% for v in available_variants %}
+          <button type="button" 
+                  class="variant-btn {% if loop.first %}active{% endif %}" 
+                  data-variant-id="{{ v.id }}"
+                  data-sku="{{ v.sku }}"
+                  data-price="{{ "%.0f"|format(v.price_override if v.price_override else product.price) }}"
+                  data-image="{{ v.image if v.image else product.main_image }}"
+                  data-qty="{{ v.quantity }}"
+                  onclick="selectVariant(this)"
+                  style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 0.6rem 1.2rem; cursor: pointer; transition: all 0.3s ease; color: var(--text-muted); font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.05em;">
+            {{ v.color or '' }} {{ v.strap_type or '' }} {{ v.size or '' }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% elif variant_count == 1 %}
+        <div style="margin-bottom: 2.5rem; padding: 1rem; background: rgba(212, 175, 55, 0.05); border-left: 2px solid var(--gold);">
+          <div style="font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; margin-bottom: 0.3rem;">Edition Details</div>
+          <div style="font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text-primary);">
+            {{ initial_variant.color or '' }} {{ initial_variant.strap_type or '' }} {{ initial_variant.size or '' }}
+            {% if initial_variant.edition %} · <span style="font-style: italic; color: var(--text-dim);">{{ initial_variant.edition }}</span>{% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Add to Cart -->
+      <div id="cartActionArea">
+        {% if product.is_in_stock %}
+        <button id="addToCartBtn" class="btn-primary" onclick="handleAddToCart()" style="width: 100%; padding: 1.2rem; font-size: 0.8rem;">
+          <i data-lucide="shopping-bag" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>Add to Collection
+        </button>
+        <button id="outOfStockBtn" class="btn-secondary" style="display:none; width: 100%; padding: 1.2rem; font-size: 0.8rem; cursor: not-allowed; opacity: 0.5;" disabled>
+          <i data-lucide="slash" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>Out of Stock
+        </button>
+        {% else %}
+        <button class="btn-secondary" style="width: 100%; padding: 1.2rem; font-size: 0.8rem; cursor: not-allowed; opacity: 0.5;" disabled>
+          <i data-lucide="slash" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>Out of Stock
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      {% if product.description %}
+      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+        <div style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem;">About This Timepiece</div>
+        <div style="color: var(--text-muted); line-height: 1.8; font-size: 1.05rem;">{{ product.description }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related %}
+  <div style="margin-top: 6rem;">
+    <div class="section-header reveal">
+      <span class="section-label"><i data-lucide="compass" style="width:14px;height:14px;margin-right:0.3rem;vertical-align:-2px;"></i> You May Also Appreciate <i data-lucide="compass" style="width:14px;height:14px;margin-left:0.3rem;vertical-align:-2px;"></i></span>
+    </div>
+    <div class="products-grid" style="max-width: 1200px; margin: 0 auto;">
+      {% for p in related %}
+      <div class="product-card reveal" data-reveal-delay="{{ loop.index0 * 100 }}" onclick="window.location.href='{{ url_for('shop.product_detail', slug=p.slug) }}'">
+        {% if p.is_featured %}
+        <span class="product-badge">Featured</span>
+        {% endif %}
+        <div class="product-img">
+          <div class="watch-illustration" style="{% if p.main_image %}background-image: url('{{ p.main_image }}'); background-size: cover;{% endif %}"></div>
+        </div>
+        <div class="product-info">
+          <span class="product-collection-tag">{{ p.category.name if p.category else 'Ottoman Time' }}</span>
+          <h3 class="product-name">{{ p.name }}</h3>
+          <p class="product-desc">{{ p.short_description or '' }}</p>
+          <div class="product-footer">
+            {% if p.discount_price %}
+              <span class="product-price">
+                <span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(p.discount_price) }}
+              </span>
+            {% else %}
+              <span class="product-price"><span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(p.price) }}</span>
+            {% endif %}
+            {% if p.quantity <= 0 %}
+              <button class="add-to-cart" style="opacity: 0.5; cursor: not-allowed;" onclick="event.stopPropagation();"><i data-lucide="slash" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Out of Stock</button>
+            {% else %}
+              <button class="add-to-cart" onclick="event.stopPropagation(); addToCart({{ p.id }})"><i data-lucide="shopping-bag" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Add</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</section>
+
+<style>
+  .variant-btn.active {
+    border-color: var(--gold) !important;
+    background: rgba(212, 175, 55, 0.1) !important;
+    color: var(--gold) !important;
+  }
+  .variant-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.06) !important;
+  }
+</style>
+
+<script>
+  let currentVariantId = {{ initial_variant.id if initial_variant else 'null' }};
+  const basePrice = {{ product.price }};
+  const baseDiscountPrice = {{ product.discount_price if product.discount_price else 'null' }};
+
+  function updateStockDisplay(qty) {
+    const stockStatus = document.getElementById('stockStatus');
+    const stockText = document.getElementById('stockText');
+    const addBtn = document.getElementById('addToCartBtn');
+    const oosBtn = document.getElementById('outOfStockBtn');
+
+    if (qty > 0) {
+      stockStatus.style.color = '#27ae60';
+      stockText.textContent = `In Stock (${qty} available)`;
+      stockStatus.querySelector('i').setAttribute('data-lucide', 'check-circle');
+      addBtn.style.display = 'block';
+      oosBtn.style.display = 'none';
+    } else {
+      stockStatus.style.color = '#c0392b';
+      stockText.textContent = 'Out of Stock';
+      stockStatus.querySelector('i').setAttribute('data-lucide', 'x-circle');
+      addBtn.style.display = 'none';
+      oosBtn.style.display = 'block';
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function selectVariant(btn) {
+    // Update UI buttons
+    document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Update state
+    currentVariantId = btn.dataset.variantId;
+    const price = btn.dataset.price;
+    const sku = btn.dataset.sku;
+    const image = btn.dataset.image;
+    const qty = parseInt(btn.dataset.qty);
+
+    // Update DOM
+    document.getElementById('displayPrice').textContent = price;
+    document.getElementById('displaySKU').textContent = sku;
+    
+    const mainImg = document.getElementById('mainProductImage');
+    const placeholder = document.getElementById('noImagePlaceholder');
+    if (image && image !== 'None') {
+      mainImg.src = image;
+      mainImg.style.display = 'block';
+      placeholder.style.display = 'none';
+    } else {
+      mainImg.style.display = 'none';
+      placeholder.style.display = 'block';
+    }
+
+    // Hide strike price if variant price is different from base discount logic
+    const strikePrice = document.getElementById('strikePrice');
+    const saleBadge = document.getElementById('saleBadge');
+    if (parseFloat(price) !== baseDiscountPrice) {
+      strikePrice.style.display = 'none';
+      if (saleBadge) saleBadge.style.display = 'none';
+    } else {
+      if (baseDiscountPrice) {
+        strikePrice.style.display = 'block';
+        if (saleBadge) saleBadge.style.display = 'block';
+      }
+    }
+
+    updateStockDisplay(qty);
+  }
+
+  function handleAddToCart() {
+    addToCart({{ product.id }}, currentVariantId);
+  }
+
+  // Initialize stock display
+  window.addEventListener('DOMContentLoaded', () => {
+    const initialQty = {{ initial_variant.quantity if initial_variant else product.total_quantity }};
+    updateStockDisplay(initialQty);
+  });
+</script>
+{% endblock %}

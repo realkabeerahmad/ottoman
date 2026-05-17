@@ -1,0 +1,45 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Orders</h1>
+    <div class="page-subtitle">Manage customer acquisitions</div>
+  </div>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Order #</th>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Items</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td class="mono">{{ order.order_number }}</td>
+      <td class="muted">{{ order.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+      <td>{{ order.customer_name }}<br><small class="muted">{{ order.customer_email }}</small></td>
+      <td class="muted">{{ order.items.count() }} items</td>
+      <td class="gold">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.total_amount) }}</td>
+      <td>
+        {% if order.status %}
+          <span class="badge badge-active">{{ order.status.name }}</span>
+        {% else %}
+          <span class="badge badge-warning">{{ order.status_string }}</span>
+        {% endif %}
+      </td>
+      <td><a href="{{ url_for('admin.view_order', id=order.id) }}" class="action-link view">View Details</a></td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="7">No orders found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

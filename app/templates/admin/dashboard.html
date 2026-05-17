@@ -1,0 +1,67 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <div class="page-subtitle">Overview of your empire</div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Acquisitions</div>
+    <div class="stat-value">{{ total_orders }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Imperial Treasury</div>
+    <div class="stat-value">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(total_revenue) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Timepieces in Catalog</div>
+    <div class="stat-value">{{ total_products }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Low Stock Variants</div>
+    <div class="stat-value" style="color: {% if low_stock_variants > 0 %}#e74c3c{% else %}var(--gold){% endif %};">{{ low_stock_variants }}</div>
+  </div>
+</div>
+
+<div class="page-header" style="border-bottom: none; padding-bottom: 0;">
+  <h2 style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.1rem;">Recent Orders</h2>
+  <a href="{{ url_for('admin.manage_orders') }}" class="action-link view">View All →</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Order #</th>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in recent_orders %}
+    <tr>
+      <td class="mono">{{ order.order_number }}</td>
+      <td class="muted">{{ order.created_at.strftime('%d %b %Y') }}</td>
+      <td>{{ order.customer_name }}</td>
+      <td class="gold">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(order.total_amount) }}</td>
+      <td>
+        {% if order.status %}
+          <span class="badge badge-active">{{ order.status.name }}</span>
+        {% else %}
+          <span class="badge badge-warning">{{ order.status_string }}</span>
+        {% endif %}
+      </td>
+      <td><a href="{{ url_for('admin.view_order', id=order.id) }}" class="action-link view">View</a></td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="6">No orders yet. Your empire awaits its first conquest.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Products</h1>
+    <div class="page-subtitle">Manage your catalog of timepieces</div>
+  </div>
+  <a href="{{ url_for('admin.add_product') }}" class="btn-admin-primary">+ Add Timepiece</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>SKU</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Stock</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in products %}
+    <tr>
+      <td class="mono muted">{{ product.sku }}</td>
+      <td>{{ product.name }}{% if product.is_featured %} <span class="badge badge-active">Featured</span>{% endif %}</td>
+      <td class="muted">{{ product.category.name if product.category else '—' }}</td>
+      <td class="gold">
+        {{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(product.price) }}
+        {% if product.discount_price %}
+          <br><small class="muted" style="text-decoration: line-through;">{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(product.discount_price) }}</small>
+        {% endif %}
+      </td>
+      <td>
+        {% if product.stock_status == 'in_stock' and product.quantity > 0 %}<span class="badge badge-active">{{ product.quantity }} In Stock</span>
+        {% elif product.stock_status == 'out_of_stock' or product.quantity <= 0 %}<span class="badge badge-inactive">Out of Stock</span>
+        {% else %}<span class="badge badge-warning">Pre-order</span>{% endif %}
+      </td>
+      <td><span class="badge {% if product.status == 'active' %}badge-active{% else %}badge-inactive{% endif %}">{{ product.status }}</span></td>
+      <td>
+        <a href="{{ url_for('admin.manage_product_variants', id=product.id) }}" class="action-link manage">Variants</a>
+        <a href="{{ url_for('admin.edit_product', id=product.id) }}" class="action-link edit">Edit</a>
+        <form class="delete-form" method="POST" action="{{ url_for('admin.delete_product', id=product.id) }}" onsubmit="return confirm('Delete this timepiece?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="7">No timepieces found. Forge your first creation.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

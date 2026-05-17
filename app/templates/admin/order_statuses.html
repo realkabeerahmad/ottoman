@@ -1,0 +1,45 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Order Statuses</h1>
+    <div class="page-subtitle">Configure order lifecycle stages</div>
+  </div>
+  <a href="{{ url_for('admin.add_order_status') }}" class="btn-admin-primary">+ Add Status</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for status in statuses %}
+    <tr>
+      <td>
+        {{ status.name }}
+        {% if status.is_system %}<span class="badge" style="background: rgba(201,168,76,0.15); color: var(--gold); font-size: 0.6rem; padding: 0.15rem 0.5rem; margin-left: 0.5rem;">🔒 System</span>{% endif %}
+        {% if status.is_default %}<span class="badge" style="background: rgba(39,174,96,0.15); color: #27ae60; font-size: 0.6rem; padding: 0.15rem 0.5rem; margin-left: 0.3rem;">Default</span>{% endif %}
+      </td>
+      <td class="muted">{{ status.description or '—' }}</td>
+      <td style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('admin.edit_order_status', id=status.id) }}" class="btn-admin-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+        {% if status.is_system %}
+          <span style="color: var(--text-dim); font-size: 0.75rem; font-style: italic;">Protected</span>
+        {% else %}
+        <form class="delete-form" method="POST" action="{{ url_for('admin.delete_order_status', id=status.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this status?');">
+          <button type="submit">Delete</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="3">No order statuses configured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <!-- Ottoman geometric mandala SVG — slow spin animation -->
+  <svg class="hero-mandala" style="animation: spin 120s linear infinite;" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#C9A84C" stroke-width="0.8">
+    <circle cx="350" cy="350" r="340"/>
+    <circle cx="350" cy="350" r="280"/>
+    <circle cx="350" cy="350" r="220"/>
+    <circle cx="350" cy="350" r="160"/>
+    <circle cx="350" cy="350" r="100"/>
+    <polygon points="350,10 664,535 36,535" />
+    <polygon points="350,690 36,165 664,165" />
+    <polygon points="10,350 535,36 535,664" />
+    <polygon points="690,350 165,664 165,36" />
+    <line x1="350" y1="10" x2="350" y2="690"/>
+    <line x1="10" y1="350" x2="690" y2="350"/>
+    <line x1="105" y1="105" x2="595" y2="595"/>
+    <line x1="595" y1="105" x2="105" y2="595"/>
+    <circle cx="350" cy="350" r="40"/>
+    <circle cx="350" cy="350" r="20"/>
+    <g transform="rotate(22.5,350,350)">
+      <polygon points="350,10 664,535 36,535" />
+      <polygon points="350,690 36,165 664,165" />
+    </g>
+  </svg>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow" style="animation: fadeInDown 1s 0.3s both;">Est. The Golden Age</p>
+    <h1 style="animation: fadeInDown 1s 0.6s both;">Ottoman<em>Time</em></h1>
+    <p class="hero-subtitle" style="animation: fadeInDown 1s 0.9s both;">Where the grandeur of empire meets the precision of horology. Each timepiece is a conquest of craft.</p>
+    <div class="hero-cta" style="animation: fadeInDown 1s 1.2s both;">
+      <a href="{{ url_for('shop.collection') }}" class="btn-primary"><i data-lucide="compass" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>Explore Collection</a>
+      <a href="#featured" class="btn-secondary"><i data-lucide="star" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>Our Signature</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll" style="animation: fadeInDown 1s 1.5s both;">
+    <div class="scroll-line"></div>
+    <span><i data-lucide="chevron-down" style="width:12px;height:12px;margin-right:0.3rem;vertical-align:-1px;"></i>Scroll</span>
+  </div>
+</section>
+
+<!-- HERITAGE -->
+<div class="heritage">
+  <div class="heritage-grid">
+    <div class="heritage-item reveal" data-reveal-delay="0">
+      <span class="heritage-num"><i data-lucide="crown" style="width:20px;height:20px;margin-right:0.4rem;vertical-align:-3px;stroke:var(--gold);"></i>600+</span>
+      <span class="heritage-label">Years of Empire Heritage</span>
+    </div>
+    <div class="heritage-item reveal" data-reveal-delay="100">
+      <span class="heritage-num"><i data-lucide="gem" style="width:20px;height:20px;margin-right:0.4rem;vertical-align:-3px;stroke:var(--gold);"></i>18K</span>
+      <span class="heritage-label">Gold Alloy Cases</span>
+    </div>
+    <div class="heritage-item reveal" data-reveal-delay="200">
+      <span class="heritage-num"><i data-lucide="battery-charging" style="width:20px;height:20px;margin-right:0.4rem;vertical-align:-3px;stroke:var(--gold);"></i>72h</span>
+      <span class="heritage-label">Power Reserve</span>
+    </div>
+    <div class="heritage-item reveal" data-reveal-delay="300">
+      <span class="heritage-num"><i data-lucide="infinity" style="width:20px;height:20px;margin-right:0.4rem;vertical-align:-3px;stroke:var(--gold);"></i>∞</span>
+      <span class="heritage-label">Lifetime Craftsmanship</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+<section id="featured" class="collection" style="padding: 6rem 4rem;">
+  <div class="section-header reveal">
+    <span class="section-label"><i data-lucide="sparkles" style="width:14px;height:14px;margin-right:0.3rem;vertical-align:-2px;"></i> Signature Pieces <i data-lucide="sparkles" style="width:14px;height:14px;margin-left:0.3rem;vertical-align:-2px;"></i></span>
+    <h2 class="section-title">Featured Timepieces</h2>
+    <p class="section-desc">Our most distinguished creations, hand-selected for the discerning collector.</p>
+  </div>
+
+  {% if products %}
+  <div class="products-grid" style="max-width: 1400px; margin: 0 auto;">
+    {% for product in products %}
+    <div class="product-card reveal" data-reveal-delay="{{ loop.index0 * 120 }}" onclick="window.location.href='{{ url_for('shop.product_detail', slug=product.slug) }}'">
+      <span class="product-badge"><i data-lucide="award" style="width:10px;height:10px;margin-right:0.3rem;vertical-align:-1px;"></i>Signature</span>
+      <div class="product-img">
+        <div class="watch-illustration" style="{% if product.main_image %}background-image: url('{{ product.main_image }}'); background-size: cover;{% endif %}"></div>
+      </div>
+      <div class="product-info">
+        <span class="product-collection-tag">{{ product.category.name if product.category else 'Ottoman Time' }}</span>
+        <h3 class="product-name"><a href="{{ url_for('shop.product_detail', slug=product.slug) }}" style="color: inherit; text-decoration: none;">{{ product.name }}</a></h3>
+        <p class="product-desc">{{ product.short_description or '' }}</p>
+        <div class="product-footer">
+          {% if product.discount_price %}
+            <span class="product-price">
+              <span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.discount_price) }}
+              <small style="text-decoration: line-through; color: var(--text-dim); margin-left: 0.5rem;">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(product.price) }}</small>
+            </span>
+          {% else %}
+            <span class="product-price"><span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.price) }}</span>
+          {% endif %}
+          {% if not product.is_in_stock %}
+            <button class="add-to-cart" style="opacity: 0.5; cursor: not-allowed;" onclick="event.stopPropagation();"><i data-lucide="slash" style="width:11px;height:11px;margin-right:0.3rem;vertical-align:-1px;"></i>Out of Stock</button>
+          {% else %}
+            <button class="add-to-cart" onclick="event.stopPropagation(); addToCart({{ product.id }})"><i data-lucide="shopping-bag" style="width:11px;height:11px;margin-right:0.3rem;vertical-align:-1px;"></i>Add</button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="reveal" data-reveal-delay="400" style="text-align: center; margin-top: 3rem;">
+    <a href="{{ url_for('shop.collection') }}" class="btn-secondary"><i data-lucide="arrow-right" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>View Full Collection</a>
+  </div>
+  {% else %}
+  <p style="text-align: center; color: var(--text-dim); font-style: italic; font-size: 1.1rem;">Featured pieces coming soon. Mark products as featured in the admin dashboard.</p>
+  {% endif %}
+</section>
+
+<!-- CRAFT -->
+<section id="craft" class="craft">
+  <div class="section-header reveal">
+    <span class="section-label"><i data-lucide="hexagon" style="width:14px;height:14px;margin-right:0.3rem;vertical-align:-2px;"></i> Our Philosophy <i data-lucide="hexagon" style="width:14px;height:14px;margin-left:0.3rem;vertical-align:-2px;"></i></span>
+    <h2 class="section-title">The Art of Imperial Craft</h2>
+  </div>
+  <div class="craft-grid">
+    <div class="craft-item reveal" data-reveal-delay="0">
+      <div style="margin-bottom: 1.5rem;">
+        <i data-lucide="landmark" style="width:48px;height:48px;stroke:var(--gold);stroke-width:1;"></i>
+      </div>
+      <h3 class="craft-title">Ottoman Heritage</h3>
+      <p class="craft-text">Every design draws from six centuries of Ottoman artistry — geometric tessellations, arabesque patterns, and celestial motifs that once adorned the halls of Topkapı Palace.</p>
+    </div>
+    <div class="craft-item reveal" data-reveal-delay="150">
+      <div style="margin-bottom: 1.5rem;">
+        <i data-lucide="settings" style="width:48px;height:48px;stroke:var(--gold);stroke-width:1;"></i>
+      </div>
+      <h3 class="craft-title">Mechanical Precision</h3>
+      <p class="craft-text">Each movement is assembled by master watchmakers in our atelier, with hundreds of hand-finished components achieving tolerances measured in microns.</p>
+    </div>
+    <div class="craft-item reveal" data-reveal-delay="300">
+      <div style="margin-bottom: 1.5rem;">
+        <i data-lucide="diamond" style="width:48px;height:48px;stroke:var(--gold);stroke-width:1;"></i>
+      </div>
+      <h3 class="craft-title">18K Gold Mastery</h3>
+      <p class="craft-text">Our cases are cast, machined, and finished entirely in-house from 18-karat gold alloys — each surface polished to a mirror or satin finish by hand over eight painstaking hours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter reveal" id="contact">
+  <div class="ornate-divider">◆ ◇ ◆</div>
+  <h2><i data-lucide="mail" style="width:24px;height:24px;margin-right:0.6rem;vertical-align:-4px;"></i>Enter the Inner Court</h2>
+  <p>Receive exclusive access to new collections, private viewings, and the stories behind each timepiece.</p>
+  <div class="newsletter-form">
+    <input type="email" placeholder="Your email address..." id="emailInput"/>
+    <button onclick="subscribeNewsletter()"><i data-lucide="send" style="width:13px;height:13px;margin-right:0.4rem;vertical-align:-1px;"></i>Subscribe</button>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+<script>
+function subscribeNewsletter() {
+  const email = document.getElementById('emailInput').value;
+  if (!email.includes('@')) { showNotification('◆ Please enter a valid email'); return; }
+  showNotification('✦ Welcome to the inner court, distinguished guest');
+  document.getElementById('emailInput').value = '';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ product.name }}</h1>
+    <div class="page-subtitle">SKU: {{ product.sku }} · Base Price: {{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(product.price) }}</div>
+  </div>
+  <a href="{{ url_for('admin.add_product_variant', id=product.id) }}" class="btn-admin-primary">+ Add Variant</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Image</th>
+      <th>Variant SKU</th>
+      <th>Color</th>
+      <th>Strap</th>
+      <th>Size</th>
+      <th>Edition</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for variant in product.variants %}
+    <tr>
+      <td>
+        {% if variant.image %}
+          <img src="{{ variant.image }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--glass-border);">
+        {% else %}
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 1rem;">⌚</div>
+        {% endif %}
+      </td>
+      <td class="mono">{{ variant.sku }}</td>
+      <td>{{ variant.color or '—' }}</td>
+      <td>{{ variant.strap_type or '—' }}</td>
+      <td>{{ variant.size or '—' }}</td>
+      <td class="muted">{{ variant.edition or '—' }}</td>
+      <td class="gold">
+        {% if variant.price_override %}
+          {{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(variant.price_override) }}
+        {% else %}
+          Base
+        {% endif %}
+      </td>
+      <td style="font-weight: bold; color: {% if variant.quantity == 0 %}#e74c3c{% elif variant.quantity <= 5 %}#f39c12{% else %}var(--gold){% endif %};">
+        {{ variant.quantity }}
+      </td>
+      <td>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <a href="{{ url_for('admin.edit_product_variant', id=variant.id) }}" class="action-link edit">Edit</a>
+          <form class="delete-form" method="POST" action="{{ url_for('admin.delete_product_variant', id=variant.id) }}" onsubmit="return confirm('Delete this variant?');">
+            <button type="submit">Delete</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="8">No variants configured. Product uses base configuration only.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

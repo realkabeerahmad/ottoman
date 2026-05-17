@@ -1,0 +1,45 @@
+{% extends "admin/admin_base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Discounts & Coupons</h1>
+    <div class="page-subtitle">Manage promotional codes</div>
+  </div>
+  <a href="{{ url_for('admin.add_coupon') }}" class="btn-admin-primary">+ Add Coupon</a>
+</div>
+
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Type</th>
+      <th>Value</th>
+      <th>Usage</th>
+      <th>Active</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for coupon in coupons %}
+    <tr>
+      <td style="font-weight: bold; letter-spacing: 0.1em;">{{ coupon.code }}</td>
+      <td class="muted" style="text-transform: uppercase; font-size: 0.85rem;">{{ coupon.discount_type }}</td>
+      <td class="gold">
+        {% if coupon.discount_type == 'percentage' %}{{ coupon.discount_value }}%{% else %}{{ config.CURRENCY_SYMBOL }}{{ "%.2f"|format(coupon.discount_value) }}{% endif %}
+      </td>
+      <td class="muted">{{ coupon.times_used }} / {{ coupon.usage_limit if coupon.usage_limit else '∞' }}</td>
+      <td><span class="badge {% if coupon.is_active %}badge-active{% else %}badge-inactive{% endif %}">{{ 'Yes' if coupon.is_active else 'No' }}</span></td>
+      <td style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('admin.edit_coupon', id=coupon.id) }}" class="btn-admin-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</a>
+        <form class="delete-form" method="POST" action="{{ url_for('admin.delete_coupon', id=coupon.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this coupon?');">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr class="empty-row"><td colspan="6">No coupons configured.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

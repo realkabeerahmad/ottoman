@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section id="collection" style="padding-top: 120px;">
+  <div class="collection">
+    <div class="section-header reveal">
+      <span class="section-label"><i data-lucide="watch" style="width:14px;height:14px;margin-right:0.3rem;vertical-align:-2px;"></i> The Collection <i data-lucide="watch" style="width:14px;height:14px;margin-left:0.3rem;vertical-align:-2px;"></i></span>
+      <h2 class="section-title">Timepieces of Conquest</h2>
+      <p class="section-desc">Each watch carries the soul of an empire — forged in precision, adorned in legacy.</p>
+    </div>
+
+    <!-- CATEGORY FILTER BAR -->
+    <div class="collection-filter reveal" data-reveal-delay="200">
+      <button class="filter-btn active" onclick="filterProducts('all', this)"><i data-lucide="grid-3x3" style="width:11px;height:11px;margin-right:0.3rem;vertical-align:-1px;"></i>All</button>
+      {% for category in categories %}
+        {% if not category.parent_id %}
+        <button class="filter-btn {% if category.is_featured %}featured-filter{% endif %}" onclick="filterProducts('{{ category.slug }}', this)">
+          {% if category.is_featured %}<i data-lucide="star" style="width:10px;height:10px;margin-right:0.2rem;vertical-align:-1px;"></i>{% endif %}{{ category.name }}
+        </button>
+        {% for child in category.subcategories %}
+          {% if child.status == 'active' %}
+          <button class="filter-btn" onclick="filterProducts('{{ child.slug }}', this)" style="font-size: 0.55rem; padding: 0.35rem 1rem; border-left: 2px solid var(--gold-dark);">
+            <i data-lucide="corner-down-right" style="width:9px;height:9px;margin-right:0.2rem;vertical-align:-1px;"></i>{{ child.name }}
+          </button>
+          {% endif %}
+        {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- FEATURED CATEGORY SECTIONS -->
+    {% for cat in featured_categories %}
+    {% set cat_products = products | selectattr('category') | selectattr('category.id', 'equalto', cat.id) | list %}
+    {% if cat_products %}
+    <div class="featured-category-section reveal" data-category-slug="{{ cat.slug }}">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+        <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, var(--glass-border));"></div>
+        <h3 style="font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: 1.3rem; white-space: nowrap;">
+          <i data-lucide="sparkles" style="width:16px;height:16px;margin-right:0.4rem;vertical-align:-2px;"></i>{{ cat.name }} Collection
+        </h3>
+        <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, var(--glass-border));"></div>
+      </div>
+      {% if cat.description %}
+      <p style="text-align: center; color: var(--text-muted); font-style: italic; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">{{ cat.description }}</p>
+      {% endif %}
+      <div class="products-grid" style="margin-bottom: 4rem;">
+        {% for product in cat_products %}
+        <div class="product-card reveal" data-category="{{ product.category.slug if product.category else 'uncategorized' }}" data-reveal-delay="{{ loop.index0 * 100 }}" onclick="window.location.href='{{ url_for('shop.product_detail', slug=product.slug) }}'">
+          {% if product.is_featured %}
+          <span class="product-badge"><i data-lucide="award" style="width:10px;height:10px;margin-right:0.2rem;vertical-align:-1px;"></i>Featured</span>
+          {% endif %}
+          <div class="product-img">
+            <div class="watch-illustration" style="{% if product.main_image %}background-image: url('{{ product.main_image }}'); background-size: cover;{% endif %}"></div>
+          </div>
+          <div class="product-info">
+            <span class="product-collection-tag">{{ product.category.name if product.category else 'Ottoman Time' }}</span>
+            <h3 class="product-name"><a href="{{ url_for('shop.product_detail', slug=product.slug) }}" style="color: inherit; text-decoration: none;">{{ product.name }}</a></h3>
+            <p class="product-desc">{{ product.short_description or '' }}</p>
+            <div class="product-footer">
+              {% if product.discount_price %}
+                <span class="product-price">
+                  <span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.discount_price) }}
+                  <small style="text-decoration: line-through; color: var(--text-dim); margin-left: 0.5rem;">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(product.price) }}</small>
+                </span>
+              {% else %}
+                <span class="product-price"><span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.price) }}</span>
+              {% endif %}
+              {% if not product.is_in_stock %}
+                <button class="add-to-cart" style="opacity: 0.5; cursor: not-allowed;" onclick="event.stopPropagation();"><i data-lucide="slash" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Out of Stock</button>
+              {% else %}
+                <button class="add-to-cart" onclick="event.stopPropagation(); addToCart({{ product.id }})"><i data-lucide="shopping-bag" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Add</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- ALL PRODUCTS GRID -->
+    <div id="allProductsSection">
+      <div class="reveal" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+        <div style="height: 1px; flex: 1; background: linear-gradient(to right, transparent, var(--glass-border));"></div>
+        <h3 style="font-family: 'Cinzel Decorative', serif; color: var(--text-muted); font-size: 1.1rem; white-space: nowrap;">
+          <i data-lucide="layout-grid" style="width:14px;height:14px;margin-right:0.4rem;vertical-align:-2px;"></i>All Timepieces
+        </h3>
+        <div style="height: 1px; flex: 1; background: linear-gradient(to left, transparent, var(--glass-border));"></div>
+      </div>
+
+      <div class="products-grid" id="productsGrid">
+        {% for product in products %}
+        <div class="product-card reveal" data-category="{{ product.category.slug if product.category else 'uncategorized' }}" data-reveal-delay="{{ loop.index0 * 80 }}" onclick="window.location.href='{{ url_for('shop.product_detail', slug=product.slug) }}'">
+          {% if product.is_featured %}
+          <span class="product-badge"><i data-lucide="award" style="width:10px;height:10px;margin-right:0.2rem;vertical-align:-1px;"></i>Featured</span>
+          {% endif %}
+          <div class="product-img">
+            <div class="watch-illustration" style="{% if product.main_image %}background-image: url('{{ product.main_image }}'); background-size: cover;{% endif %}"></div>
+          </div>
+          <div class="product-info">
+            <span class="product-collection-tag">{{ product.category.name if product.category else 'Ottoman Time' }}</span>
+            <h3 class="product-name"><a href="{{ url_for('shop.product_detail', slug=product.slug) }}" style="color: inherit; text-decoration: none;">{{ product.name }}</a></h3>
+            <p class="product-desc">{{ product.short_description or '' }}</p>
+            <div class="product-footer">
+              {% if product.discount_price %}
+                <span class="product-price">
+                  <span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.discount_price) }}
+                  <small style="text-decoration: line-through; color: var(--text-dim); margin-left: 0.5rem;">{{ config.CURRENCY_SYMBOL }}{{ "%.0f"|format(product.price) }}</small>
+                </span>
+              {% else %}
+                <span class="product-price"><span class="currency">{{ config.CURRENCY_SYMBOL }}</span>{{ "%.0f"|format(product.price) }}</span>
+              {% endif %}
+              {% if not product.is_in_stock %}
+                <button class="add-to-cart" style="opacity: 0.5; cursor: not-allowed;" onclick="event.stopPropagation();"><i data-lucide="slash" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Out of Stock</button>
+              {% else %}
+                <button class="add-to-cart" onclick="event.stopPropagation(); addToCart({{ product.id }})"><i data-lucide="shopping-bag" style="width:11px;height:11px;margin-right:0.2rem;vertical-align:-1px;"></i>Add</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% else %}
+          <p style="text-align:center; color: var(--text-dim); grid-column: 1/-1; padding: 3rem 0;">No timepieces found in our current catalog.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Category hierarchy: parent-slug -> [child slugs]
+const CATEGORY_TREE = {{ category_tree | tojson }};
+
+function getSlugsForFilter(slug) {
+  if (CATEGORY_TREE[slug]) {
+    return [slug, ...CATEGORY_TREE[slug]];
+  }
+  return [slug];
+}
+
+function filterProducts(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const featuredSections = document.querySelectorAll('.featured-category-section');
+  const allSection = document.getElementById('allProductsSection');
+  const allCards = document.querySelectorAll('#productsGrid .product-card');
+
+  if (cat === 'all') {
+    featuredSections.forEach(s => s.style.display = 'block');
+    allSection.style.display = 'block';
+    allCards.forEach(card => card.style.display = 'flex');
+  } else {
+    const matchingSlugs = getSlugsForFilter(cat);
+
+    featuredSections.forEach(s => {
+      s.style.display = matchingSlugs.includes(s.dataset.categorySlug) ? 'block' : 'none';
+    });
+
+    allSection.style.display = 'block';
+    allCards.forEach(card => {
+      card.style.display = matchingSlugs.includes(card.dataset.category) ? 'flex' : 'none';
+    });
+  }
+}
+</script>
+{% endblock %}
