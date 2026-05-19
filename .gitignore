@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Flask / Application stuff
+instance/
+.webassets-cache
+compiled_templates/
+
+# Database files
+*.db
+*.sqlite3
+app.db
+
+# Uploads
+app/static/uploads/
+uploads/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
