@@ -53,8 +53,9 @@ def require_admin():
 # ─────────────────────────────────────────────────────────────
 @admin.route('/')
 def dashboard():
-    total_orders = Order.query.count()
-    total_revenue = db.session.query(db.func.sum(Order.total_amount)).scalar() or 0
+    active_condition = ~Order.status.has(OrderStatus.name.in_(['Cancelled', 'Refunded']))
+    total_orders = Order.query.filter(active_condition).count()
+    total_revenue = db.session.query(db.func.sum(Order.total_amount)).filter(active_condition).scalar() or 0
     total_products = Product.query.count()
     low_stock_variants = ProductVariant.query.filter(ProductVariant.quantity <= 5).count()
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(10).all()
@@ -513,8 +514,42 @@ def view_order(id):
 def update_order_status(id):
     order = Order.query.get_or_404(id)
     status_id = request.form.get('order_status_id')
+    
     if status_id:
+        old_status = order.status
+        new_status = OrderStatus.query.get(int(status_id))
+        
+        if old_status and new_status and old_status.id != new_status.id:
+            cancelled_states = ['Cancelled', 'Refunded']
+            was_cancelled = old_status.name in cancelled_states
+            is_cancelled = new_status.name in cancelled_states
+            
+            # Transition: Active -> Cancelled (Restock items)
+            if not was_cancelled and is_cancelled:
+                for item in order.items:
+                    if item.variant_id:
+                        variant = ProductVariant.query.get(item.variant_id)
+                        if variant:
+                            variant.quantity += item.quantity
+                    elif item.product_id:
+                        product = Product.query.get(item.product_id)
+                        if product:
+                            product.quantity += item.quantity
+            
+            # Transition: Cancelled -> Active (Deduct items)
+            elif was_cancelled and not is_cancelled:
+                for item in order.items:
+                    if item.variant_id:
+                        variant = ProductVariant.query.get(item.variant_id)
+                        if variant:
+                            variant.quantity = max(0, variant.quantity - item.quantity)
+                    elif item.product_id:
+                        product = Product.query.get(item.product_id)
+                        if product:
+                            product.quantity = max(0, product.quantity - item.quantity)
+
         order.order_status_id = int(status_id)
         db.session.commit()
         flash('Order status updated.', 'success')
+        
     return redirect(url_for('admin.view_order', id=id))

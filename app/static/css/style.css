@@ -872,60 +872,120 @@
   .newsletter-form button:hover { filter: brightness(1.1); }
 
   /* ── FOOTER ── */
+  .site-footer {
+    position: relative;
+    background: linear-gradient(to top, rgba(201,168,76,0.05), transparent);
+    border-top: 1px solid rgba(201,168,76,0.15);
+    margin-top: 4rem;
+  }
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
   footer {
-    border-top: 1px solid var(--glass-border);
-    padding: 4rem;
+    padding: 5rem 4rem 3rem;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 3rem;
+    gap: 4rem;
     max-width: 1400px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
   .footer-brand .logo {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 1.3rem;
-    color: var(--gold);
-    display: block;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    text-shadow: 0 0 20px rgba(201,168,76,0.2);
   }
   .footer-brand p {
-    font-size: 0.9rem;
-    color: var(--text-dim);
+    font-size: 0.95rem;
+    color: var(--text-muted);
     font-style: italic;
-    line-height: 1.7;
-    max-width: 280px;
-    margin-top: 1rem;
+    line-height: 1.8;
+    max-width: 320px;
+    margin-top: 1.2rem;
   }
   .footer-col h4 {
     font-family: 'Cinzel', serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
     color: var(--gold);
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+  .footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 30px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
   }
   .footer-col ul { list-style: none; }
   .footer-col li {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
   .footer-col a {
     color: var(--text-dim);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.3s;
-    font-style: italic;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
   }
-  .footer-col a:hover { color: var(--gold); }
+  .footer-col a:hover { 
+    color: var(--gold); 
+    transform: translateX(5px);
+  }
   .footer-bottom {
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255,255,255,0.05);
     padding: 2rem 4rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-dim);
     font-family: 'Cinzel', serif;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
+    background: rgba(10,10,10,0.4);
+    backdrop-filter: blur(10px);
+  }
+  .footer-bottom-left {
+    display: flex;
+    align-items: center;
+  }
+  .footer-bottom-right {
+    display: flex;
+    align-items: center;
+  }
+  .made-by-link {
+    color: var(--gold);
+    text-decoration: none;
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    background: rgba(201,168,76,0.05);
+    border: 1px solid rgba(201,168,76,0.15);
+    font-weight: bold;
+  }
+  .made-by-link:hover {
+    background: rgba(201,168,76,0.15);
+    box-shadow: 0 0 15px rgba(201,168,76,0.3);
+    transform: translateY(-2px);
   }
 
   /* ── NOTIFICATION ── */

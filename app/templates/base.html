@@ -79,42 +79,52 @@
   </main>
 
   <!-- FOOTER -->
-  <footer>
-    <div class="footer-brand">
-      <span class="logo"><i data-lucide="clock"
-          style="width:16px;height:16px;stroke:var(--gold);margin-right:0.4rem;vertical-align:-2px;"></i>Ottoman
-        Time</span>
-      <span
-        style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;color:var(--gold-dark);text-transform:uppercase;">Timepieces
-        of Empire</span>
-      <p>Crafted for those who understand that time is not merely measured — it is conquered.</p>
+  <div class="site-footer">
+    <footer>
+      <div class="footer-brand">
+        <span class="logo"><i data-lucide="clock"
+            style="width:20px;height:20px;stroke:var(--gold);margin-right:0.5rem;vertical-align:-3px;"></i>Ottoman
+          Time</span>
+        <span
+          style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.35em;color:var(--gold-dark);text-transform:uppercase;">Timepieces
+          of Empire</span>
+        <p>Crafted for those who understand that time is not merely measured — it is conquered.</p>
+      </div>
+      <div class="footer-col">
+        <h4><i data-lucide="watch" style="width:14px;height:14px;margin-right:0.5rem;vertical-align:-2px;"></i>Collection
+        </h4>
+        <ul>
+          <li><a href="{{ url_for('shop.collection') }}">All Timepieces</a></li>
+          <li><a href="{{ url_for('main.index') }}#featured">Signature Series</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4><i data-lucide="hammer" style="width:14px;height:14px;margin-right:0.5rem;vertical-align:-2px;"></i>Atelier
+        </h4>
+        <ul>
+          <li><a href="{{ url_for('main.index') }}#craft">Our Craft</a></li>
+          <li><a href="#">Heritage</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4><i data-lucide="mail" style="width:14px;height:14px;margin-right:0.5rem;vertical-align:-2px;"></i>House</h4>
+        <ul>
+          <li><a href="{{ url_for('main.index') }}#contact">Contact Us</a></li>
+          <li><a href="#">Bespoke Requests</a></li>
+        </ul>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <div class="footer-bottom-left">
+        <span>© 2025 Ottoman Time. All rights reserved.</span>
+        <span style="color:var(--gold);letter-spacing:0.3em; margin: 0 15px;">◆ ◇ ◆</span>
+        <span><i data-lucide="map-pin"
+            style="width:12px;height:12px;margin-right:0.4rem;vertical-align:-2px;"></i>Lahore</span>
+      </div>
+      <div class="footer-bottom-right">
+        <span>Made by <a href="https://buildwithad.dev/" target="_blank" rel="noopener noreferrer" class="made-by-link">BuildWithAD</a></span>
+      </div>
     </div>
-    <div class="footer-col">
-      <h4><i data-lucide="watch" style="width:12px;height:12px;margin-right:0.4rem;vertical-align:-1px;"></i>Collection
-      </h4>
-      <ul>
-        <li><a href="{{ url_for('shop.collection') }}">All Timepieces</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4><i data-lucide="hammer" style="width:12px;height:12px;margin-right:0.4rem;vertical-align:-1px;"></i>Atelier
-      </h4>
-      <ul>
-        <li><a href="{{ url_for('main.index') }}#craft">Our Craft</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4><i data-lucide="mail" style="width:12px;height:12px;margin-right:0.4rem;vertical-align:-1px;"></i>House</h4>
-      <ul>
-        <li><a href="{{ url_for('main.index') }}#contact">Contact</a></li>
-      </ul>
-    </div>
-  </footer>
-  <div class="footer-bottom">
-    <span>© 2025 Ottoman Time. All rights reserved.</span>
-    <span style="color:var(--gold);letter-spacing:0.3em;">◆ ◇ ◆</span>
-    <span><i data-lucide="map-pin"
-        style="width:11px;height:11px;margin-right:0.3rem;vertical-align:-1px;"></i>Lahore</span>
   </div>
 
   <!-- CART SIDEBAR -->
